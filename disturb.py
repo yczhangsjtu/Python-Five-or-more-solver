@@ -11,7 +11,7 @@ while True:
         if abs(k) < 10:
             n[i] = k + choice([-1,1])*randrange(5,10)
         else:
-            n[i] = k + choice([-1,1])*randrange(abs(k)/2,abs(k))
+            n[i] = k + choice([-1,1])*randrange(abs(k)/5,abs(k)/3)
         print " ".join(map(str,n))
     except:
         break

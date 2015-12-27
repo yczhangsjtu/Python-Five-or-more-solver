@@ -8,7 +8,7 @@ function test_para {
 		if [[ "$bd" == *"over"* ]]; then
 			break
 		fi
-		bd=`echo "$bd" | ./fomanl | ./cancel.py | ./addrand.py | ./cancel.py`
+		bd=`echo "$bd" | ./fomanl | ./cancel.py | ./addrand.py #| ./cancel.py`
 	done
 	score=`echo "$bd" | grep -E '[0-9]+'`
 }
@@ -16,37 +16,50 @@ function test_para {
 function update_para {
 	param=`cat param`
 	nparam=`echo $param | ./disturb.py`
-	echo "Testing current parameter"
-	echo $param
-	s=""
-	for i in `seq 1 10`; do
-		printf "Test $i "
-		test_para
-		echo "Score: $score"
-		s="$s $score"
-	done
-	s=`echo $s | ./mid.py`
-	echo "Mid: $s"
+	if [[ "$curr_score" == "" ]]; then
+		echo "Testing current parameter"
+		echo $param
+		s=""
+		for i in `seq 1 10`; do
+			printf "Test $i "
+			test_para
+			echo "Score: $score"
+			s="$s $score"
+		done
+		s=`echo $s | ./mid.py`
+		echo "Mid: $s"
+		curr_score=$s
+	fi
+	echo "curr_score: $curr_score"
+	echo "curr_param: $param"
 	echo "Testing updated parameter"
 	echo "$nparam" > param
-	echo $nparam
+	echo "new_param: $nparam"
 	t=0
 	for i in `seq 1 10`; do
 		printf "Test $i "
 		test_para
 		echo "Score: $score"
 		t="$t $score"
+		if [[ "$i" -gt 5 ]]; then
+			maxcurr=`echo $t | ./currmax.py`
+			if [[ "$maxcurr" -lt "$curr_score" ]]; then
+				break
+			fi
+		fi
 	done
 	t=`echo $t | ./mid.py`
 	echo "Mid: $t"
-	if [ "$s" -gt "$t" ]; then
+	if [ "$curr_score" -gt "$t" ]; then
 		echo "New parameter is worse, change back"
 		echo "$param" > param
 	else
 		echo "New paramter is better"
+		curr_score=$t
 	fi
 }
 
-for i in `seq 1 10`; do
+curr_score=""
+for i in `seq 1 20`; do
 	update_para
 done
