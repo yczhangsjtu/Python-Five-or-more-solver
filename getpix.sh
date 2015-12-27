@@ -10,6 +10,9 @@ while true; do
 	fi
 done
 
+echo normal
+echo 0
+
 i=`expr index "$lct" ,`
 x=$((${lct:0:$((i-1))}+50))
 y=$((${lct:i}+50))

@@ -1,3 +1,4 @@
 #!/bin/bash
 
-./screen.sh | ./getpix.sh | ./fomanl.py
+clear
+./screen.sh | ./getpix.sh | ./fomanl.py | ./cancel.py
