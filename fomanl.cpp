@@ -1,5 +1,6 @@
 #include <cstdio>
 #include <cstdlib>
+#include <unistd.h>
 #include <cstring>
 #include <algorithm>
 #include <cassert>
@@ -15,6 +16,21 @@ typedef struct Point {
 typedef struct Move {
 	int e,p,q,r,s;
 } Move;
+
+int a1 = 5;
+int a2 = 50;
+int a3 = 300;
+int a4 = 1000;
+int a5 = 10000;
+int a6 = 300;
+int a7 = 250;
+int a8 = 100;
+int a9 = 20;
+int a10 = 20;
+int a11 = 3;
+int a12 = 0;
+int a13 = -50;
+int a14 = -100;
 
 int __evalfive(char c1, char c2, char c3, char c4, char c5)
 {
@@ -35,11 +51,11 @@ int __evalfive(char c1, char c2, char c3, char c4, char c5)
 	if(lst == 0) return 4;
 	if(lst == 1)
 	{
-        if(ls == 1) return 5;
-        if(ls == 2) return 50;
-        if(ls == 3) return 300;
-        if(ls == 4) return 1000;
-        if(ls == 5) return 10000;
+        if(ls == 1) return a1;
+        if(ls == 2) return a2;
+        if(ls == 3) return a3;
+        if(ls == 4) return a4;
+        if(ls == 5) return a5;
 	}
 	if(lst == 2)
 	{
@@ -47,16 +63,16 @@ int __evalfive(char c1, char c2, char c3, char c4, char c5)
 		int count = 0;
 		for(int i = 1; i < lst; i++)
 			if(st[i-1]!=st[i]) count = i;
-		if(count == 4) return 300;
-		if(count == 3 && ls == 4) return 250;
-		if(count == 3 && ls == 5) return 100;
-		if(count == 2 && ls == 3) return 20;
-		if(count == 2 && ls == 4) return 20;
-		if(count == 1 && ls == 2) return 1;
+		if(count == 4) return a6;
+		if(count == 3 && ls == 4) return a7;
+		if(count == 3 && ls == 5) return a8;
+		if(count == 2 && ls == 3) return a9;
+		if(count == 2 && ls == 4) return a10;
+		if(count == 1 && ls == 2) return a11;
 	}
-	if(lst == 3) return 0;
-	if(lst == 4) return -50;
-	if(lst == 5) return -100;
+	if(lst == 3) return a12;
+	if(lst == 4) return a13;
+	if(lst == 5) return a14;
 	return 0;
 }
 
@@ -145,6 +161,31 @@ Move *bestmove(char (*bd)[10])
 	return m;
 }
 
+void printcolormove(char (*bd)[10], int p, int q, int r, int s)
+{
+    char c = bd[p][q];
+    char d = bd[r][s];
+	assert(c != '.' && d == '.');
+    bd[p][q] = 'O';
+    bd[r][s] = '*';
+    system("clear");
+	for(int i = 0; i < 9; i++)
+	{
+        for(int j = 0; j < 9; j++)
+		{
+            if(bd[i][j] == 'O')
+				printf("\x1b[37;44m\033[1m.\033[0m");
+			else if(bd[i][j] == '*')
+                printf("\033[0;31m%c\033[0m",c);
+            else
+				printf("%c",bd[i][j]);
+		}
+		printf("\n");
+	}
+	bd[p][q] = c;
+	bd[r][s] = d;
+}
+
 void printmove(char (*bd)[10], int p, int q, int r, int s)
 {
 	char c = bd[p][q];
@@ -158,8 +199,25 @@ void printmove(char (*bd)[10], int p, int q, int r, int s)
 	bd[r][s] = d;
 }
 
-int main()
+bool color = false;
+
+int main(int argc, char *argv[])
 {
+	int ch;
+	while((ch = getopt(argc,argv,"c")) != -1)
+	{
+		switch(ch)
+		{
+		case 'c': color = true; break;
+		}
+	}
+	FILE *f = fopen("param","r");
+	if(f)
+	{
+		fscanf(f,"%d%d%d%d%d%d%d%d%d%d%d%d%d%d",
+				&a1,&a2,&a3,&a4,&a5,&a6,&a7,&a8,&a9,&a10,&a11,&a12,&a13,&a14);
+		fclose(f);
+	}
 	char state[256];
 	char data[9][10];
 	int score;
@@ -178,8 +236,13 @@ int main()
 	}
 	else
 	{
-		printf("normal\n%d\n",score);
-		printmove(data,bm->p,bm->q,bm->r,bm->s);
+		if(color)
+			printcolormove(data,bm->p,bm->q,bm->r,bm->s);
+		else
+		{
+			printf("normal\n%d\n",score);
+			printmove(data,bm->p,bm->q,bm->r,bm->s);
+		}
 		delete bm;
 	}
 	return 0;
