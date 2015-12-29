@@ -56,6 +56,7 @@ function repeat_test {
 
 eb="........."
 eb=`echo -e "normal\n0\n$eb\n$eb\n$eb\n$eb\n$eb\n$eb\n$eb\n$eb\n$eb"`
+# echo "$eb" | ./addrand.py
 
 repeat_test
 # learn

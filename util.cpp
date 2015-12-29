@@ -32,9 +32,8 @@ inline int chi(bool b1,bool b2,bool b3,bool b4,bool b5)
 {
 	return chi(b1)+chi(b2)+chi(b3)+chi(b4)+chi(b5);
 }
-inline int chi(char c,char c1,char c2,char c3,char c4,char c5)
+inline int scale(int k)
 {
-	int k = chi(c==c1,c==c2,c==c3,c==c4,c==c5);
 	switch(k)
 	{
 	case 0:return a2;case 1:return a3;case 2:return a4;case 3:return a5;
@@ -42,40 +41,68 @@ inline int chi(char c,char c1,char c2,char c3,char c4,char c5)
 	default:return a10;
 	}
 }
+inline int chi(char c,char c1,char c2,char c3,char c4,char c5)
+{
+	int k = chi(c==c1,c==c2,c==c3,c==c4,c==c5);
+	return scale(k);
+}
 
 inline void updatemax(int *n, int m)
 {
 	if(m > *n) *n = m;
 }
 
+inline bool blocked(char (*bd)[10], int p, int q)
+{
+	return bd[p][q] != '.'
+		&& (p==0 || bd[p-1][q] != '.')
+		&& (q==0 || bd[p][q-1] != '.')
+		&& (p==8 || bd[p+1][q] != '.')
+		&& (q==8 || bd[p][q+1] != '.');
+}
+
+inline int outway(char (*bd)[10], int p, int q)
+{
+	return chi(p>0 || bd[p-1][q] == '.')
+	   +chi(q>0 || bd[p][q-1] == '.')
+	   +chi(p<8 || bd[p+1][q] == '.')
+	   +chi(q<8 || bd[p][q+1] == '.');
+}
+
+void getscore(int *n, char (*bd)[10], char c, int my, int p, int q, int dx, int dy)
+{
+	int k = my-1, s = 1, discount = 0;
+	while(k >= 0)
+	{
+		int x = p+k*dx, y = q+k*dy;
+		if(x < 0 || x > 8 || y < 0 || y > 8) return;
+		if(bd[x][y] == c) s++;
+		else if(blocked(bd,x,y)) break;
+		else if(outway(bd,x,y)<2) discount += a11;
+		k--;
+	}
+	k = my+1;
+	while(k < 5)
+	{
+		int x = p+k*dx, y = q+k*dy;
+		if(x < 0 || x > 8 || y < 0 || y > 8) return;
+		if(bd[x][y] == c) s++;
+		else if(blocked(bd,x,y)) break;
+		else if(outway(bd,x,y)<2) discount += a11;
+		k++;
+	}
+	updatemax(n,scale(s));
+	*n = *n > discount? *n-discount: 0;
+}
+
 void countmax(char (*bd)[10], int *n, int p, int q, int k)
 {
 	char cc = colors[k];
 	*n = 0;
-
-	if(p-4>=0) updatemax(n,chi(cc,bd[p-4][q],bd[p-3][q],bd[p-2][q],bd[p-1][q],cc));
-	if(p-3>=0&&p+1<9) updatemax(n,chi(cc,bd[p-3][q],bd[p-2][q],bd[p-1][q],cc,bd[p+1][q]));
-	if(p-2>=0&&p+2<9) updatemax(n,chi(cc,bd[p-2][q],bd[p-1][q],cc,bd[p+1][q],bd[p+2][q]));
-	if(p-1>=0&&p+3<9) updatemax(n,chi(cc,bd[p-1][q],cc,bd[p+1][q],bd[p+2][q],bd[p+3][q]));
-	if(p+4<9) updatemax(n,chi(cc,cc,bd[p+1][q],bd[p+2][q],bd[p+3][q],bd[p+4][q]));
-
-	if(q-4>=0) updatemax(n,chi(cc,bd[p][q-4],bd[p][q-3],bd[p][q-2],bd[p][q-1],cc));
-	if(q-3>=0&&q+1<9) updatemax(n,chi(cc,bd[p][q-3],bd[p][q-2],bd[p][q-1],cc,bd[p][q+1]));
-	if(q-2>=0&&q+2<9) updatemax(n,chi(cc,bd[p][q-2],bd[p][q-1],cc,bd[p][q+1],bd[p][q+2]));
-	if(q-1>=0&&q+3<9) updatemax(n,chi(cc,bd[p][q-1],cc,bd[p][q+1],bd[p][q+2],bd[p][q+3]));
-	if(q+4<9) updatemax(n,chi(cc,cc,bd[p][q+1],bd[p][q+2],bd[p][q+3],bd[p][q+4]));
-
-	if(q-4>=0&&p-4>=0) updatemax(n,chi(cc,bd[p-4][q-4],bd[p-3][q-3],bd[p-2][q-2],bd[p-1][q-1],cc));
-	if(q-3>=0&&q+1<9&&p-3>=0&&p+1<9) updatemax(n,chi(cc,bd[p-3][q-3],bd[p-2][q-2],bd[p-1][q-1],cc,bd[p+1][q+1]));
-	if(q-2>=0&&q+2<9&&p-2>=0&&p+2<9) updatemax(n,chi(cc,bd[p-2][q-2],bd[p-1][q-1],cc,bd[p+1][q+1],bd[p+2][q+2]));
-	if(q-1>=0&&q+3<9&&p-1>=0&&p+3<9) updatemax(n,chi(cc,bd[p-1][q-1],cc,bd[p+1][q+1],bd[p+2][q+2],bd[p+3][q+3]));
-	if(q+4<9&&p+4<9) updatemax(n,chi(cc,cc,bd[p+1][q+1],bd[p+2][q+2],bd[p+3][q+3],bd[p+4][q+4]));
-
-	if(q+4<9&&p-4>=0) updatemax(n,chi(cc,bd[p-4][q+4],bd[p-3][q+3],bd[p-2][q+2],bd[p-1][q+1],cc));
-	if(q+3<9&&q-1>=0&&p-3>=0&&p+1<9) updatemax(n,chi(cc,bd[p-3][q+3],bd[p-2][q+2],bd[p-1][q+1],cc,bd[p+1][q-1]));
-	if(q+2<9&&q-2>=0&&p-2>=0&&p+2<9) updatemax(n,chi(cc,bd[p-2][q+2],bd[p-1][q+1],cc,bd[p+1][q-1],bd[p+2][q-2]));
-	if(q+1<9&&q-3>=0&&p-1>=0&&p+3<9) updatemax(n,chi(cc,bd[p-1][q+1],cc,bd[p+1][q-1],bd[p+2][q-2],bd[p+3][q-3]));
-	if(q-4>=0&&p+4<9) updatemax(n,chi(cc,cc,bd[p+1][q-1],bd[p+2][q-2],bd[p+3][q-3],bd[p+4][q-4]));
+	for(int i = 0; i < 5; i++) getscore(n,bd,cc,i,p-i,q,1,0);
+	for(int i = 0; i < 5; i++) getscore(n,bd,cc,i,p,q-i,0,1);
+	for(int i = 0; i < 5; i++) getscore(n,bd,cc,i,p-i,q-i,1,1);
+	for(int i = 0; i < 5; i++) getscore(n,bd,cc,i,p-i,q+i,1,-1);
 }
 
 int gain(char (*bd)[10], int p, int q, int s, int t, char c)
@@ -270,7 +297,7 @@ void printcolormove(char (*bd)[10], int p, int q, int r, int s)
 	assert(c != '.' && d == '.');
     bd[p][q] = 'O';
     bd[r][s] = '*';
-    system("clear");
+    int sys = system("clear");
 	for(int i = 0; i < 9; i++)
 	{
         for(int j = 0; j < 9; j++)
