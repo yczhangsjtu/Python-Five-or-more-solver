@@ -6,7 +6,7 @@ function test_para {
 		if [[ "$bd" == *"over"* ]]; then
 			break
 		fi
-		bd=`echo "$bd" | ./fomanl | ./cancel.py | ./addrand.py #| ./cancel.py`
+		bd=`echo "$bd" | ./fomanl`
 	done
 	score=`echo "$bd" | grep -E '[0-9]+'`
 }
@@ -44,7 +44,7 @@ function learn {
 
 function repeat_test {
 	test_score=""
-	for i in `seq 1 10`; do
+	for i in `seq 1 20`; do
 		printf "Test $i "
 		test_para
 		echo "Score: $score"
@@ -57,6 +57,5 @@ function repeat_test {
 eb="........."
 eb=`echo -e "normal\n0\n$eb\n$eb\n$eb\n$eb\n$eb\n$eb\n$eb\n$eb\n$eb"`
 # echo "$eb" | ./addrand.py
-
-repeat_test
-# learn
+# repeat_test
+learn

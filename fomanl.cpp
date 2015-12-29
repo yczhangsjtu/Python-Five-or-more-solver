@@ -90,6 +90,30 @@ Move *bestmove(char (*bd)[10])
 }
 #endif
 
+bool cycle(char (*bd)[10],int *score)
+{
+	Move *bm = bestmove(bd);
+	if(!bm)
+	{
+		return false;
+	}
+	else
+	{
+		takemove(bd,bm->p,bm->q,bm->r,bm->s);
+		delete bm;
+		int addscore = cancel(bd);
+		*score += addscore;
+		if(!addscore)
+		{
+			if(!addrand(bd))
+				return false;
+			else
+				*score += cancel(bd);
+		}
+	}
+	return true;
+}
+
 bool color = false;
 
 int main(int argc, char *argv[])
@@ -105,36 +129,39 @@ int main(int argc, char *argv[])
 	FILE *f = fopen("param","r");
 	if(f)
 	{
-		int tmp = fscanf(f,"%d%d%d%d%d%d%d%d%d%d%d%d%d%d",
-				&a1,&a2,&a3,&a4,&a5,&a6,&a7,&a8,&a9,&a10,&a11,&a12,&a13,&a14);
+		int tmp = fscanf(f,"%d%d%d%d%d%d%d%d%d%d%d%d",
+				&a1,&a2,&a3,&a4,&a5,&a6,&a7,&a8,&a9,&a10,&a11,&a12);
 		fclose(f);
 	}
-	char state[256];
 	char data[9][10];
 	int score;
-	int tmp = scanf("%s%d",state,&score);
-	if(strcmp(state,"over")==0)
+	if(!freadboard(stdin,data,&score))
 	{
 		printf("over\n%d\n",score);
 		return 0;
 	}
-	for(int i = 0; i < 9; i++)
-		int tmp = scanf("%s",data[i]);
-	Move *bm = bestmove(data);
-	if(!bm)
+	if(!color)
 	{
-		printf("over\n%d\n",score);
+		if(cycle(data,&score))
+		{
+			printf("normal\n%d\n",score);
+			printboard(data);
+		}
+		else
+			printf("over\n%d\n",score);
 	}
 	else
 	{
-		if(color)
-			printcolormove(data,bm->p,bm->q,bm->r,bm->s);
+		Move *bm = bestmove(data);
+		if(!bm)
+		{
+			printf("over\n%d\n",score);
+		}
 		else
 		{
-			printf("normal\n%d\n",score);
-			printmove(data,bm->p,bm->q,bm->r,bm->s);
+			printcolormove(data,bm->p,bm->q,bm->r,bm->s);
+			delete bm;
 		}
-		delete bm;
 	}
 	return 0;
 }

@@ -12,6 +12,10 @@ extern int a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11,a12,a13,a14;
 extern char colors[7];
 
 /****************** Small utilities *****************************/
+inline bool all(char c1,char c2,char c3,char c4,char c5)
+{
+	return c1 != '.' && c1==c2 && c1==c3 && c1==c4 && c1==c5;
+}
 int ctoi(char c)
 {
 	switch(c)
@@ -22,8 +26,6 @@ int ctoi(char c)
 	}
 	return 0;
 }
-
-/****************** Evaluation thing ****************************/
 inline int chi(bool b)
 {
 	return b?1:0;
@@ -69,6 +71,56 @@ inline int outway(char (*bd)[10], int p, int q)
 	   +chi(q<8 || bd[p][q+1] == '.');
 }
 
+bool addrand(char (*bd)[10])
+{
+	int p = 0;
+	Point buf[81];
+	for(int i = 0; i < 9; i++)
+		for(int j = 0; j < 9; j++)
+			if(bd[i][j] == '.') buf[p++]=Point(i,j);
+	if(p < 3) return false;
+	random_shuffle(buf,buf+p);
+	for(int i = 0; i < 3; i++)
+		bd[buf[i].i][buf[i].j] = colors[rand()%7];
+	return true;
+}
+
+int cancel(char (*bd)[10])
+{
+	bool bl[9][9];
+	for(int i = 0; i < 9; i++)
+		for(int j = 0; j < 9; j++)
+			bl[i][j] = false;
+	for(int i = 0; i < 9; i++)
+		for(int j = 0; j < 5; j++)
+		{
+            if(all(bd[i][j],bd[i][j+1],bd[i][j+2],bd[i][j+3],bd[i][j+4]))
+                bl[i][j] = bl[i][j+1] = bl[i][j+2] = bl[i][j+3] = bl[i][j+4] = true;
+            if(all(bd[j][i],bd[j+1][i],bd[j+2][i],bd[j+3][i],bd[j+4][i]))
+                bl[j][i] = bl[j+1][i] = bl[j+2][i] = bl[j+3][i] = bl[j+4][i] = true;
+		}
+	for(int i = 0; i < 5; i++)
+		for(int j = 0; j < 5; j++)
+		{
+            if(all(bd[i][j],bd[i+1][j+1],bd[i+2][j+2],bd[i+3][j+3],bd[i+4][j+4]))
+				bl[i][j] = bl[i+1][j+1] = bl[i+2][j+2] = bl[i+3][j+3] = bl[i+4][j+4] = true;
+            if(all(bd[i][j+4],bd[i+1][j+3],bd[i+2][j+2],bd[i+3][j+1],bd[i+4][j]))
+				bl[i][j+4] = bl[i+1][j+3] = bl[i+2][j+2] = bl[i+3][j+1] = bl[i+4][j] = true;
+		}
+	int s = 0;
+	for(int i = 0; i < 9; i++)
+		for(int j = 0; j < 9; j++)
+		{
+			if(bl[i][j])
+			{
+				bd[i][j] = '.';
+				s++;
+			}
+		}
+	return s;
+}
+
+/****************** Evaluation thing ****************************/
 void getscore(int *n, char (*bd)[10], char c, int my, int p, int q, int dx, int dy)
 {
 	int k = my-1, s = 1, discount = 0;
@@ -323,9 +375,24 @@ void getavail(char (*bd)[10], int p, int q, Point *buf, int *s)
 	}
 }
 
+void takemove(char (*bd)[10], int p, int q, int r, int s)
+{
+	char c = bd[p][q];
+	char d = bd[r][s];
+	assert(c != '.' && d == '.');
+	bd[p][q] = '.';
+	bd[r][s] = c;
+}
+
 
 
 /**********************Print functions************************/
+void printboard(char (*bd)[10])
+{
+	for(int i = 0; i < 9; i++)
+		printf("%s\n",bd[i]);
+}
+
 /*
  * Print how to move the pawn
  */
@@ -370,3 +437,13 @@ void printmove(char (*bd)[10], int p, int q, int r, int s)
 	bd[r][s] = d;
 }
 
+bool freadboard(FILE *f, char (*bd)[10], int *score)
+{
+	char state[256];
+	int tmp = scanf("%s%d",state,score);
+	if(strcmp(state,"over")==0)
+		return false;
+	for(int i = 0; i < 9; i++)
+		int tmp = scanf("%s",bd[i]);
+	return true;
+}

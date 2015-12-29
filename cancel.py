@@ -24,8 +24,6 @@ else:
                 bl[i][j+2] = True
                 bl[i][j+3] = True
                 bl[i][j+4] = True
-    for i in range(9):
-        for j in range(5):
             if __all(bd[j][i],bd[j+1][i],bd[j+2][i],\
                     bd[j+3][i],bd[j+4][i]):
                 bl[j][i]= True
@@ -42,8 +40,6 @@ else:
                 bl[i+2][j+2] = True
                 bl[i+3][j+3] = True
                 bl[i+4][j+4] = True
-    for i in range(5):
-        for j in range(5):
             if __all(bd[i][j+4],bd[i+1][j+3],bd[i+2][j+2],\
                     bd[i+3][j+1],bd[i+4][j]):
                 bl[i][j+4] = True
