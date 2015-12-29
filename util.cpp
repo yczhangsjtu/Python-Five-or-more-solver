@@ -24,62 +24,99 @@ int ctoi(char c)
 }
 
 /****************** Evaluation thing ****************************/
-void evalneed(char (*bd)[10], Need (*nd)[9])
+inline int chi(bool b)
+{
+	return b?1:0;
+}
+inline int chi(bool b1,bool b2,bool b3,bool b4,bool b5)
+{
+	return chi(b1)+chi(b2)+chi(b3)+chi(b4)+chi(b5);
+}
+inline int chi(char c,char c1,char c2,char c3,char c4,char c5)
+{
+	int k = chi(c==c1,c==c2,c==c3,c==c4,c==c5);
+	switch(k)
+	{
+	case 0:return a2;case 1:return a3;case 2:return a4;case 3:return a5;
+	case 4:return a6;case 5:return a7;case 6:return a8;case 7:return a9;
+	default:return a10;
+	}
+}
+
+inline void updatemax(int *n, int m)
+{
+	if(m > *n) *n = m;
+}
+
+void countmax(char (*bd)[10], int *n, int p, int q, int k)
+{
+	char cc = colors[k];
+	*n = 0;
+
+	if(p-4>=0) updatemax(n,chi(cc,bd[p-4][q],bd[p-3][q],bd[p-2][q],bd[p-1][q],cc));
+	if(p-3>=0&&p+1<9) updatemax(n,chi(cc,bd[p-3][q],bd[p-2][q],bd[p-1][q],cc,bd[p+1][q]));
+	if(p-2>=0&&p+2<9) updatemax(n,chi(cc,bd[p-2][q],bd[p-1][q],cc,bd[p+1][q],bd[p+2][q]));
+	if(p-1>=0&&p+3<9) updatemax(n,chi(cc,bd[p-1][q],cc,bd[p+1][q],bd[p+2][q],bd[p+3][q]));
+	if(p+4<9) updatemax(n,chi(cc,cc,bd[p+1][q],bd[p+2][q],bd[p+3][q],bd[p+4][q]));
+
+	if(q-4>=0) updatemax(n,chi(cc,bd[p][q-4],bd[p][q-3],bd[p][q-2],bd[p][q-1],cc));
+	if(q-3>=0&&q+1<9) updatemax(n,chi(cc,bd[p][q-3],bd[p][q-2],bd[p][q-1],cc,bd[p][q+1]));
+	if(q-2>=0&&q+2<9) updatemax(n,chi(cc,bd[p][q-2],bd[p][q-1],cc,bd[p][q+1],bd[p][q+2]));
+	if(q-1>=0&&q+3<9) updatemax(n,chi(cc,bd[p][q-1],cc,bd[p][q+1],bd[p][q+2],bd[p][q+3]));
+	if(q+4<9) updatemax(n,chi(cc,cc,bd[p][q+1],bd[p][q+2],bd[p][q+3],bd[p][q+4]));
+
+	if(q-4>=0&&p-4>=0) updatemax(n,chi(cc,bd[p-4][q-4],bd[p-3][q-3],bd[p-2][q-2],bd[p-1][q-1],cc));
+	if(q-3>=0&&q+1<9&&p-3>=0&&p+1<9) updatemax(n,chi(cc,bd[p-3][q-3],bd[p-2][q-2],bd[p-1][q-1],cc,bd[p+1][q+1]));
+	if(q-2>=0&&q+2<9&&p-2>=0&&p+2<9) updatemax(n,chi(cc,bd[p-2][q-2],bd[p-1][q-1],cc,bd[p+1][q+1],bd[p+2][q+2]));
+	if(q-1>=0&&q+3<9&&p-1>=0&&p+3<9) updatemax(n,chi(cc,bd[p-1][q-1],cc,bd[p+1][q+1],bd[p+2][q+2],bd[p+3][q+3]));
+	if(q+4<9&&p+4<9) updatemax(n,chi(cc,cc,bd[p+1][q+1],bd[p+2][q+2],bd[p+3][q+3],bd[p+4][q+4]));
+
+	if(q+4<9&&p-4>=0) updatemax(n,chi(cc,bd[p-4][q+4],bd[p-3][q+3],bd[p-2][q+2],bd[p-1][q+1],cc));
+	if(q+3<9&&q-1>=0&&p-3>=0&&p+1<9) updatemax(n,chi(cc,bd[p-3][q+3],bd[p-2][q+2],bd[p-1][q+1],cc,bd[p+1][q-1]));
+	if(q+2<9&&q-2>=0&&p-2>=0&&p+2<9) updatemax(n,chi(cc,bd[p-2][q+2],bd[p-1][q+1],cc,bd[p+1][q-1],bd[p+2][q-2]));
+	if(q+1<9&&q-3>=0&&p-1>=0&&p+3<9) updatemax(n,chi(cc,bd[p-1][q+1],cc,bd[p+1][q-1],bd[p+2][q-2],bd[p+3][q-3]));
+	if(q-4>=0&&p+4<9) updatemax(n,chi(cc,cc,bd[p+1][q-1],bd[p+2][q-2],bd[p+3][q-3],bd[p+4][q-4]));
+}
+
+int gain(char (*bd)[10], int p, int q, int s, int t, char c)
+{
+	assert(bd[p][q] == c);
+	assert(bd[s][t] == '.');
+	bd[p][q] = '.';
+	int n1, n2, ic=ctoi(c);
+	countmax(bd,&n1,p,q,ic);
+	countmax(bd,&n2,s,t,ic);
+	bd[p][q] = c;
+	return n2-n1;
+}
+
+inline int maxexcept(int e, int *n)
+{
+	int max = 0;
+	for(int i = 0; i < 7; i++)
+		if(i!=e) updatemax(&max,n[i]);
+	return max;
+}
+
+
+
+Out evalout(char (*bd)[10], int p, int q)
+{
+	Out out;
+	int n[7] = {0,0,0,0,0,0,0};
+	for(int k = 0; k < 7; k++)
+		countmax(bd,&n[k],p,q,k);
+	for(int ic = 0; ic < 7; ic++)
+		out.out[ic] = maxexcept(ic,n);
+	return out;
+}
+
+void evalout(char (*bd)[10], Out (*out)[9])
 {
 	int m[] = {a1,a2,a3,a4};
-	int in[9][9][7][4];
 	for(int i = 0; i < 9; i++)
 		for(int j = 0; j < 9; j++)
-			for(int k = 0; k < 7; k++)
-				for(int l = 0; l < 4; l++)
-					in[i][j][k][l] = 1;
-	for(int i = 0; i < 9; i++)
-		for(int j = 0; j < 9; j++)
-		{
-			char c = bd[i][j];
-			nd[i][j].c = c;
-			if(c == '.') continue;
-			int ic = ctoi(c);
-			for(int k = 0; k < 4; k++)
-			{
-				if(i+1+k< 9) in[i+1+k][j][ic][0] *= m[k];
-				if(i-1-k>=0) in[i-1-k][j][ic][0] *= m[k];
-				if(j+1+k< 9) in[i][j+1+k][ic][1] *= m[k];
-				if(j-1-k>=0) in[i][j-1-k][ic][1] *= m[k];
-				if(abs(i-j)<=4)
-				{
-					if(i+1+k< 9&&j+1+k< 9) in[i+1+k][j+1+k][ic][2] *= m[k];
-					if(i-1-k>=0&&j-1-k>=0) in[i-1-k][j-1-k][ic][2] *= m[k];
-				}
-				if(i+j>=4 && i+j<=12)
-				{
-					if(i+1+k< 9&&j-1-k>=0) in[i+1+k][j-1-k][ic][3] *= m[k];
-					if(i-1-k>=0&&j+1+k< 9) in[i-1-k][j+1+k][ic][3] *= m[k];
-				}
-			}
-		}
-	for(int i = 0; i < 9; i++)
-		for(int j = 0; j < 9; j++)
-		{
-			int mx = 0;
-			for(int k = 0; k < 7; k++)
-			{
-				nd[i][j].in[k] = in[i][j][k][0]+in[i][j][k][1]
-								+in[i][j][k][2]+in[i][j][k][3];
-				if(nd[i][j].in[k] > mx) mx = nd[i][j].in[k];
-			}
-			int ic = ctoi(nd[i][j].c);
-			int sum = 0;
-			int fix = nd[i][j].c == '.'? 0: nd[i][j].in[ic] *= a6;
-			for(int k = 0; k < 7; k++)
-				sum += nd[i][j].in[k];
-			for(int k = 0; k < 7; k++)
-			{
-				nd[i][j].in[k] *= a5;
-				nd[i][j].in[k] -= sum;
-			}
-			nd[i][j].in[ic] += fix;
-		}
+			out[i][j] = evalout(bd,i,j);
 }
 
 /**

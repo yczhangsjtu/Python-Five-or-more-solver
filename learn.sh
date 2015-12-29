@@ -17,49 +17,45 @@ function update_para {
 	if [[ "$curr_score" == "" ]]; then
 		echo "Testing current parameter"
 		echo $param
-		s=""
-		for i in `seq 1 10`; do
-			printf "Test $i "
-			test_para
-			echo "Score: $score"
-			s="$s $score"
-		done
-		s=`echo $s | ./mid.py`
-		echo "Mid: $s"
-		curr_score=$s
+		repeat_test
+		curr_score=$test_score
 	fi
 	echo "curr_score: $curr_score"
 	echo "curr_param: $param"
 	echo "Testing updated parameter"
 	echo "$nparam" > param
 	echo "new_param: $nparam"
-	t=0
-	for i in `seq 1 10`; do
-		printf "Test $i "
-		test_para
-		echo "Score: $score"
-		t="$t $score"
-		if [[ "$i" -gt 5 ]]; then
-			maxcurr=`echo $t | ./currmax.py`
-			if [[ "$maxcurr" -lt "$curr_score" ]]; then
-				break
-			fi
-		fi
-	done
-	t=`echo $t | ./mid.py`
-	echo "Mid: $t"
-	if [ "$curr_score" -gt "$t" ]; then
+	repeat_test
+	if [ "$curr_score" -gt "$test_score" ]; then
 		echo "New parameter is worse, change back"
 		echo "$param" > param
 	else
 		echo "New paramter is better"
-		curr_score=$t
+		curr_score=$test_score
 	fi
+}
+
+function learn {
+	curr_score=""
+	for i in `seq 1 20`; do
+		update_para
+	done
+}
+
+function repeat_test {
+	test_score=""
+	for i in `seq 1 10`; do
+		printf "Test $i "
+		test_para
+		echo "Score: $score"
+		test_score="$test_score $score"
+	done
+	test_score=`echo $test_score | ./mid.py`
+	echo "Mid: $test_score"
 }
 
 eb="........."
 eb=`echo -e "normal\n0\n$eb\n$eb\n$eb\n$eb\n$eb\n$eb\n$eb\n$eb\n$eb"`
-curr_score=""
-for i in `seq 1 20`; do
-	update_para
-done
+
+repeat_test
+# learn

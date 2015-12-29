@@ -7,7 +7,7 @@
 
 using namespace std;
 
-int a1 = 5;
+int a1 = 2;
 int a2 = 4;
 int a3 = 3;
 int a4 = 2;
@@ -27,8 +27,8 @@ char colors[7] = {'r','g','b','y','o','p','d'};
 Move *bestmove(char (*bd)[10])
 {
 	Move *m = NULL;
-	Need nd[9][9];
-	evalneed(bd,nd);
+	Out out[9][9];
+	evalout(bd,out);
 	for(int i = 0; i < 9; i++)
 		for(int j = 0; j < 9; j++)
 		{
@@ -43,7 +43,8 @@ Move *bestmove(char (*bd)[10])
 				for(int k = 0; k < navl; k++)
 				{
 					int s = buf[k].i, t = buf[k].j;
-					int e = a7*nd[s][t].in[ic] - nd[i][j].in[ic];
+					int e = out[i][j].out[ic] - out[s][t].out[ic];
+					e += gain(bd,i,j,s,t,c) * a1;
 					if(!m || m->e < e)
 					{
 						delete m;

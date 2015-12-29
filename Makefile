@@ -4,10 +4,10 @@ BIN=fomanl
 OBJ=util.o main.o
 
 $(BIN): $(OBJ)
-	$(CPP) $(OBJ) -o $@
+	$(CPP) $(OBJ) -o $@ $(FLAG)
 
 util.o: util.cpp util.h
-	$(CPP) $< -c -o $@
+	$(CPP) $< -c -o $@ $(FLAG)
 
 main.o: fomanl.cpp util.h
-	$(CPP) $< -c -o $@
+	$(CPP) $< -c -o $@ $(FLAG)
