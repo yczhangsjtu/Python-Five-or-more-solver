@@ -1,8 +1,6 @@
 #!/bin/bash
 
 function test_para {
-	eb="........."
-	eb=`echo -e "normal\n0\n$eb\n$eb\n$eb\n$eb\n$eb\n$eb\n$eb\n$eb\n$eb"`
 	bd=`echo "$eb" | ./addrand.py`
 	while true; do
 		if [[ "$bd" == *"over"* ]]; then
@@ -59,6 +57,8 @@ function update_para {
 	fi
 }
 
+eb="........."
+eb=`echo -e "normal\n0\n$eb\n$eb\n$eb\n$eb\n$eb\n$eb\n$eb\n$eb\n$eb"`
 curr_score=""
 for i in `seq 1 20`; do
 	update_para
