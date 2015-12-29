@@ -8,19 +8,19 @@
 using namespace std;
 
 int a1 = 2;
-int a2 = 4;
+int a2 = 1;
 int a3 = 3;
-int a4 = 2;
-int a5 = 2;
-int a6 = 300;
-int a7 = 250;
-int a8 = 100;
-int a9 = 20;
-int a10 = 20;
+int a4 = 8;
+int a5 = 27;
+int a6 = 54;
+int a7 = 135;
+int a8 = 162;
+int a9 = 163;
+int a10 = 163;
 int a11 = 3;
-int a12 = 0;
-int a13 = -50;
-int a14 = -100;
+int a12 = 10;
+int a13 = 50;
+int a14 = 100;
 char colors[7] = {'r','g','b','y','o','p','d'};
 
 #if 1
@@ -45,6 +45,7 @@ Move *bestmove(char (*bd)[10])
 					int s = buf[k].i, t = buf[k].j;
 					int e = out[i][j].out[ic] - out[s][t].out[ic];
 					e += gain(bd,i,j,s,t,c) * a1;
+					e += connectgain(bd,i,j,s,t,c) * a12;
 					if(!m || m->e < e)
 					{
 						delete m;
@@ -104,21 +105,21 @@ int main(int argc, char *argv[])
 	FILE *f = fopen("param","r");
 	if(f)
 	{
-		fscanf(f,"%d%d%d%d%d%d%d%d%d%d%d%d%d%d",
+		int tmp = fscanf(f,"%d%d%d%d%d%d%d%d%d%d%d%d%d%d",
 				&a1,&a2,&a3,&a4,&a5,&a6,&a7,&a8,&a9,&a10,&a11,&a12,&a13,&a14);
 		fclose(f);
 	}
 	char state[256];
 	char data[9][10];
 	int score;
-	scanf("%s%d",state,&score);
+	int tmp = scanf("%s%d",state,&score);
 	if(strcmp(state,"over")==0)
 	{
 		printf("over\n%d\n",score);
 		return 0;
 	}
 	for(int i = 0; i < 9; i++)
-		scanf("%s",data[i]);
+		int tmp = scanf("%s",data[i]);
 	Move *bm = bestmove(data);
 	if(!bm)
 	{

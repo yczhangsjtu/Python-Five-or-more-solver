@@ -117,6 +117,19 @@ int gain(char (*bd)[10], int p, int q, int s, int t, char c)
 	return n2-n1;
 }
 
+int connectgain(char (*bd)[10], int p, int q, int s, int t, char c)
+{
+	assert(bd[p][q] == c);
+	assert(bd[s][t] == '.');
+	int c1 = numofarea(bd,p,q);
+	bd[p][q] = c;
+	bd[s][t] = '.';
+	int c2 = numofarea(bd,s,t);
+	bd[p][q] = c;
+	bd[s][t] = '.';
+	return c1-c2;
+}
+
 inline int maxexcept(int e, int *n)
 {
 	int max = 0;
@@ -255,6 +268,32 @@ bool connected(char (*bd)[10], int p, int q, int r, int s)
 		}
 	}
 	return false;
+}
+
+int fill(char (*bd)[10], int p, int q)
+{
+	if(p > 8 || p < 0 || q > 8 || q < 0) return 0;
+	if(bd[p][q] != '.') return 0;
+	bd[p][q] = '\0';
+	fill(bd,p+1,q);
+	fill(bd,p-1,q);
+	fill(bd,p,q+1);
+	fill(bd,p,q-1);
+	return 1;
+}
+
+int numofarea(char (*bd)[10], int p, int q)
+{
+	int s = 0;
+	if(bd[p][q] == '.') return 1;
+	s += fill(bd,p-1,q);
+	s += fill(bd,p+1,q);
+	s += fill(bd,p,q-1);
+	s += fill(bd,p,q+1);
+	for(int i = 0; i < 9; i++)
+		for(int j = 0; j < 9; j++)
+			if(bd[i][j] == '\0') bd[i][j] = '.';
+	return s;
 }
 
 void getavail(char (*bd)[10], int p, int q, Point *buf, int *s)
