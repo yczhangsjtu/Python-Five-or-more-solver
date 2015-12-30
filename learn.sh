@@ -1,13 +1,7 @@
 #!/bin/bash
 
 function test_para {
-	bd=`echo "$eb" | ./addrand.py`
-	while true; do
-		if [[ "$bd" == *"over"* ]]; then
-			break
-		fi
-		bd=`echo "$bd" | ./fomanl`
-	done
+	bd=`./fomanl -ae -i $i`
 	score=`echo "$bd" | grep -E '[0-9]+'`
 }
 
@@ -57,5 +51,5 @@ function repeat_test {
 eb="........."
 eb=`echo -e "normal\n0\n$eb\n$eb\n$eb\n$eb\n$eb\n$eb\n$eb\n$eb\n$eb"`
 # echo "$eb" | ./addrand.py
-# repeat_test
-learn
+repeat_test
+# learn

@@ -3,6 +3,7 @@
 #include <unistd.h>
 #include <cstring>
 #include <cassert>
+#include <ctime>
 #include "util.h"
 
 using namespace std;
@@ -45,7 +46,7 @@ Move *bestmove(char (*bd)[10])
 					int s = buf[k].i, t = buf[k].j;
 					int e = out[i][j].out[ic] - out[s][t].out[ic];
 					e += gain(bd,i,j,s,t,c) * a1;
-					e += connectgain(bd,i,j,s,t,c) * a12;
+					e += connectgain(bd,i,j,s,t,c) * a9;
 					if(!m || m->e < e)
 					{
 						delete m;
@@ -115,40 +116,60 @@ bool cycle(char (*bd)[10],int *score)
 }
 
 bool color = false;
+bool add = false;
+bool empty = false;
 
 int main(int argc, char *argv[])
 {
-	int ch;
-	while((ch = getopt(argc,argv,"c")) != -1)
+	int ch, index;
+	while((ch = getopt(argc,argv,"caei:")) != -1)
 	{
 		switch(ch)
 		{
 		case 'c': color = true; break;
+		case 'a': add = true; break;
+		case 'e': empty = true; break;
+		case 'i': index = atoi(optarg); break;
 		}
 	}
 	FILE *f = fopen("param","r");
 	if(f)
 	{
-		int tmp = fscanf(f,"%d%d%d%d%d%d%d%d%d%d%d%d",
-				&a1,&a2,&a3,&a4,&a5,&a6,&a7,&a8,&a9,&a10,&a11,&a12);
+		int tmp = fscanf(f,"%d%d%d%d%d%d%d%d%d",
+				&a1,&a2,&a3,&a4,&a5,&a6,&a7,&a8,&a9);
 		fclose(f);
 	}
 	char data[9][10];
 	int score;
-	if(!freadboard(stdin,data,&score))
+	if(empty)
 	{
-		printf("over\n%d\n",score);
-		return 0;
+		for(int i = 0; i < 9; i++)
+			for(int j = 0; j < 9; j++)
+				data[i][j] = '.';
+		score = 0;
+	}
+	else
+	{
+		if(!freadboard(stdin,data,&score))
+		{
+			printf("over\n%d\n",score);
+			return 0;
+		}
+	}
+	srand((unsigned)time(0)+index);
+	if(add)
+	{
+		if(!addrand(data))
+		{
+			printf("over\n%d\n",score);
+			return 0;
+		}
 	}
 	if(!color)
 	{
-		if(cycle(data,&score))
-		{
-			printf("normal\n%d\n",score);
-			printboard(data);
-		}
-		else
-			printf("over\n%d\n",score);
+		while(cycle(data,&score))
+			;
+		printf("over\n%d\n",score);
 	}
 	else
 	{

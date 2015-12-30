@@ -39,9 +39,9 @@ inline int scale(int k)
 	switch(k)
 	{
 	case 0:return a2;case 1:return a3;case 2:return a4;case 3:return a5;
-	case 4:return a6;case 5:return a7;case 6:return a8;case 7:return a9;
-	default:return a10;
+	case 4:return a6;case 5:return a7;
 	}
+	return 0;
 }
 inline int chi(char c,char c1,char c2,char c3,char c4,char c5)
 {
@@ -130,7 +130,7 @@ void getscore(int *n, char (*bd)[10], char c, int my, int p, int q, int dx, int 
 		if(x < 0 || x > 8 || y < 0 || y > 8) return;
 		if(bd[x][y] == c) s++;
 		else if(blocked(bd,x,y)) break;
-		else if(outway(bd,x,y)<2) discount += a11;
+		else if(outway(bd,x,y)<2) discount += a8;
 		k--;
 	}
 	k = my+1;
@@ -140,7 +140,7 @@ void getscore(int *n, char (*bd)[10], char c, int my, int p, int q, int dx, int 
 		if(x < 0 || x > 8 || y < 0 || y > 8) return;
 		if(bd[x][y] == c) s++;
 		else if(blocked(bd,x,y)) break;
-		else if(outway(bd,x,y)<2) discount += a11;
+		else if(outway(bd,x,y)<2) discount += a8;
 		k++;
 	}
 	updatemax(n,scale(s));
