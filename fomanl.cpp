@@ -4,32 +4,28 @@
 #include <cstring>
 #include <cassert>
 #include <ctime>
+#include <set>
 #include "util.h"
 
 using namespace std;
 
-int a1 = 2;
-int a2 = 1;
-int a3 = 3;
-int a4 = 8;
-int a5 = 27;
-int a6 = 54;
-int a7 = 135;
-int a8 = 162;
-int a9 = 163;
-int a10 = 163;
-int a11 = 3;
-int a12 = 10;
-int a13 = 50;
-int a14 = 100;
+int a1 = 0;
+int a2 = 0;
+int a3 = 0;
+int a4 = 0;
+int a5 = 0;
+int a6 = 0;
+int a7 = 1;
+int a8 = 100;
+int a9 = 1000;
+int a10 = 10000;
+int a11 = 100000;
+int maxBranch = 3;
 char colors[7] = {'r','g','b','y','o','p','d'};
 
-#if 1
-Move *bestmove(char (*bd)[10])
+Move *bestmove(char (*bd)[10], int depth)
 {
-	Move *m = NULL;
-	Out out[9][9];
-	evalout(bd,out);
+	set<Move> mvs;
 	for(int i = 0; i < 9; i++)
 		for(int j = 0; j < 9; j++)
 		{
@@ -43,53 +39,64 @@ Move *bestmove(char (*bd)[10])
 				if(navl == 0) continue;
 				for(int k = 0; k < navl; k++)
 				{
+					int e,f;
 					int s = buf[k].i, t = buf[k].j;
-					int e = out[i][j].out[ic] - out[s][t].out[ic];
-					e += gain(bd,i,j,s,t,c) * a1;
-					e += connectgain(bd,i,j,s,t,c) * a9;
-					if(!m || m->e < e)
-					{
-						delete m;
-						m = new Move;
-						m->e = e; m->p = i; m->q = j;
-						m->r = s; m->s = t;
-					}
+					bd[i][j] = '.';
+					bd[s][t] = c;
+					evalfives(bd,e,f);
+					Move m(e,f,i,j,s,t);
+					if(f == 10) m.h = 0;
+					mvs.insert(m);
+					if(mvs.size() > maxBranch) mvs.erase(mvs.begin());
+					bd[i][j] = c;
+					bd[s][t] = '.';
 				}
 			}
 		}
-	return m;
+	if(depth > 0)
+	{
+		set<Move>::iterator *buf = new set<Move>::iterator[maxBranch];
+		int s = 0;
+		for(set<Move>::iterator iter = mvs.begin();
+				iter != mvs.end(); iter++)
+			buf[s++] = iter;
+		for(int i = 0; i < s; i++)
+		{
+			set<Move>::iterator iter = buf[i];
+			Move m = *iter;
+			if(m.h < 10) continue;
+			char c = bd[m.p][m.q];
+			assert(bd[m.r][m.s] == '.');
+			bd[m.p][m.q] = '.';
+			bd[m.r][m.s] = c;
+
+			Move * bm = bestmove(bd,depth-1);
+			if(bm && bm->h < 10)
+			{
+				m.h = bm->h+1;
+				mvs.erase(iter);
+				mvs.insert(m);
+			}
+			if(bm) delete bm;
+
+			bd[m.p][m.q] = c;
+			bd[m.r][m.s] = '.';
+		}
+		delete []buf;
+	}
+	if(mvs.size() > 0)
+	{
+		Move *mv = new Move;
+		*mv = *mvs.rbegin();
+		return mv;
+	}
+	return NULL;
 }
 
-#else
 Move *bestmove(char (*bd)[10])
 {
-	Move *m = NULL;
-	for(int p = 0; p < 9; p++)
-		for(int q = 0; q < 9; q++)
-			for(int r = 0; r < 9; r++)
-				for(int s = 0; s < 9; s++)
-				{
-					if(bd[p][q] == '.' || bd[r][s] != '.')
-						continue;
-					if(!connected(bd,p,q,r,s))
-						continue;
-					char c = bd[p][q];
-					bd[p][q] = '.';
-					bd[r][s] = c;
-					int e = __eval(bd);
-					if(!m || e > m->e)
-					{
-						delete m;
-						m = new Move;
-						m->e = e; m->p = p; m->q = q;
-						m->r = r; m->s = s;
-					}
-					bd[p][q] = c;
-					bd[r][s] = '.';
-				}
-	return m;
+	return bestmove(bd,5);
 }
-#endif
 
 bool cycle(char (*bd)[10],int *score)
 {
@@ -132,6 +139,7 @@ int main(int argc, char *argv[])
 		case 'i': index = atoi(optarg); break;
 		}
 	}
+	/*
 	FILE *f = fopen("param","r");
 	if(f)
 	{
@@ -139,6 +147,7 @@ int main(int argc, char *argv[])
 				&a1,&a2,&a3,&a4,&a5,&a6,&a7,&a8,&a9);
 		fclose(f);
 	}
+	*/
 	char data[9][10];
 	int score;
 	if(empty)

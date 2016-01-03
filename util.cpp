@@ -8,7 +8,7 @@
 
 using namespace std;
 
-extern int a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11,a12,a13,a14;
+extern int a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11;
 extern char colors[7];
 
 /****************** Small utilities *****************************/
@@ -34,19 +34,15 @@ inline int chi(bool b1,bool b2,bool b3,bool b4,bool b5)
 {
 	return chi(b1)+chi(b2)+chi(b3)+chi(b4)+chi(b5);
 }
-inline int scale(int k)
+inline int scoreof(int k)
 {
 	switch(k)
 	{
-	case 0:return a2;case 1:return a3;case 2:return a4;case 3:return a5;
-	case 4:return a6;case 5:return a7;
+	case 0:return a1;case 1:return a2;case 2:return a3;case 3:return a4;
+	case 4:return a5;case 5:return a6;case 6:return a7;case 7:return a8;
+	case 8:return a9;case 9:return a10;case 10:return a11;
 	}
 	return 0;
-}
-inline int chi(char c,char c1,char c2,char c3,char c4,char c5)
-{
-	int k = chi(c==c1,c==c2,c==c3,c==c4,c==c5);
-	return scale(k);
 }
 
 inline void updatemax(int *n, int m)
@@ -121,173 +117,62 @@ int cancel(char (*bd)[10])
 }
 
 /****************** Evaluation thing ****************************/
-void getscore(int *n, char (*bd)[10], char c, int my, int p, int q, int dx, int dy)
-{
-	int k = my-1, s = 1, discount = 0;
-	while(k >= 0)
-	{
-		int x = p+k*dx, y = q+k*dy;
-		if(x < 0 || x > 8 || y < 0 || y > 8) return;
-		if(bd[x][y] == c) s++;
-		else if(blocked(bd,x,y)) break;
-		else if(outway(bd,x,y)<2) discount += a8;
-		k--;
-	}
-	k = my+1;
-	while(k < 5)
-	{
-		int x = p+k*dx, y = q+k*dy;
-		if(x < 0 || x > 8 || y < 0 || y > 8) return;
-		if(bd[x][y] == c) s++;
-		else if(blocked(bd,x,y)) break;
-		else if(outway(bd,x,y)<2) discount += a8;
-		k++;
-	}
-	updatemax(n,scale(s));
-	*n = *n > discount? *n-discount: 0;
-}
-
-void countmax(char (*bd)[10], int *n, int p, int q, int k)
-{
-	char cc = colors[k];
-	*n = 0;
-	for(int i = 0; i < 5; i++) getscore(n,bd,cc,i,p-i,q,1,0);
-	for(int i = 0; i < 5; i++) getscore(n,bd,cc,i,p,q-i,0,1);
-	for(int i = 0; i < 5; i++) getscore(n,bd,cc,i,p-i,q-i,1,1);
-	for(int i = 0; i < 5; i++) getscore(n,bd,cc,i,p-i,q+i,1,-1);
-}
-
-int gain(char (*bd)[10], int p, int q, int s, int t, char c)
-{
-	assert(bd[p][q] == c);
-	assert(bd[s][t] == '.');
-	bd[p][q] = '.';
-	int n1, n2, ic=ctoi(c);
-	countmax(bd,&n1,p,q,ic);
-	countmax(bd,&n2,s,t,ic);
-	bd[p][q] = c;
-	return n2-n1;
-}
-
-int connectgain(char (*bd)[10], int p, int q, int s, int t, char c)
-{
-	assert(bd[p][q] == c);
-	assert(bd[s][t] == '.');
-	int c1 = numofarea(bd,p,q);
-	bd[p][q] = c;
-	bd[s][t] = '.';
-	int c2 = numofarea(bd,s,t);
-	bd[p][q] = c;
-	bd[s][t] = '.';
-	return c1-c2;
-}
-
-inline int maxexcept(int e, int *n)
-{
-	int max = 0;
-	for(int i = 0; i < 7; i++)
-		if(i!=e) updatemax(&max,n[i]);
-	return max;
-}
-
-
-
-Out evalout(char (*bd)[10], int p, int q)
-{
-	Out out;
-	int n[7] = {0,0,0,0,0,0,0};
-	for(int k = 0; k < 7; k++)
-		countmax(bd,&n[k],p,q,k);
-	for(int ic = 0; ic < 7; ic++)
-		out.out[ic] = maxexcept(ic,n);
-	return out;
-}
-
-void evalout(char (*bd)[10], Out (*out)[9])
-{
-	int m[] = {a1,a2,a3,a4};
-	for(int i = 0; i < 9; i++)
-		for(int j = 0; j < 9; j++)
-			out[i][j] = evalout(bd,i,j);
-}
-
 /**
  * How good are five consecutive positions
  */
-int __evalfive(char c1, char c2, char c3, char c4, char c5)
+int evalfive(char c1, char c2, char c3, char c4, char c5)
 {
 	char l[] = {c1,c2,c3,c4,c5};
-	char s[5];
-	char st[5];
-	int ls = 0;
-	int lst = 0;
+	// Get the number of dominant color
+	sort(l,l+5);
+	int m = 0, s = 0;
+	int mn = 0;
 	for(int i = 0; i < 5; i++)
-		if(l[i]!='.') s[ls++] = l[i];
-	for(int i = 0; i < ls; i++)
 	{
-		bool e = false;
-		for(int j = 0; j < lst; j++)
-			if(st[j] == s[i]) e = true;
-		if(!e) st[lst++] = s[i];
+		if(l[i] == '.') continue;
+		s++; // The number of nonempty positions
+		if(i == 0 || l[i] != l[i-1]) {updatemax(&mn,m);m = 1;continue;}
+		m++;
 	}
-	if(lst == 0) return 4;
-	if(lst == 1)
-	{
-        if(ls == 1) return a1;
-        if(ls == 2) return a2;
-        if(ls == 3) return a3;
-        if(ls == 4) return a4;
-        if(ls == 5) return a5;
-	}
-	if(lst == 2)
-	{
-		sort(st,st+lst);
-		int count = 0;
-		for(int i = 1; i < lst; i++)
-			if(st[i-1]!=st[i]) count = i;
-		if(count == 4) return a6;
-		if(count == 3 && ls == 4) return a7;
-		if(count == 3 && ls == 5) return a8;
-		if(count == 2 && ls == 3) return a9;
-		if(count == 2 && ls == 4) return a10;
-		if(count == 1 && ls == 2) return a11;
-	}
-	if(lst == 3) return a12;
-	if(lst == 4) return a13;
-	if(lst == 5) return a14;
-	return 0;
+	updatemax(&mn,m);
+	return 5+2*mn-s;
 }
 
-int evalfives(char (*bd)[10])
+void evalfives(char (*bd)[10], int &e, int &f)
 {
-	int s = 0;
+	e = f = 0;
 	for(int i = 0; i < 9; i++)
 		for(int j = 0; j < 5; j++)
-            s += __evalfive(bd[i][j],bd[i][j+1],bd[i][j+2],
+		{
+			int ef = evalfive(bd[i][j],bd[i][j+1],bd[i][j+2],
                            bd[i][j+3],bd[i][j+4]);
+			e += scoreof(ef);
+			updatemax(&f,ef);
+		}
 	for(int i = 0; i < 9; i++)
 		for(int j = 0; j < 5; j++)
-            s += __evalfive(bd[j][i],bd[j+1][i],bd[j+2][i],
+		{
+            int ef = evalfive(bd[j][i],bd[j+1][i],bd[j+2][i],
                            bd[j+3][i],bd[j+4][i]);
+			e += scoreof(ef);
+			updatemax(&f,ef);
+		}
 	for(int i = 0; i < 5; i++)
 		for(int j = 0; j < 5; j++)
-            s += __evalfive(bd[i][j],bd[i+1][j+1],bd[i+2][j+2],
+		{
+            int ef = evalfive(bd[i][j],bd[i+1][j+1],bd[i+2][j+2],
                            bd[i+3][j+3],bd[i+4][j+4]);
+			e += scoreof(ef);
+			updatemax(&f,ef);
+		}
 	for(int i = 0; i < 5; i++)
 		for(int j = 0; j < 5; j++)
-            s += __evalfive(bd[i][j+4],bd[i+1][j+3],bd[i+2][j+2],
+		{
+            int ef = evalfive(bd[i][j+4],bd[i+1][j+3],bd[i+2][j+2],
                            bd[i+3][j+1],bd[i+4][j]);
-    return s;
-}
-
-/**
- * Evaluate the board
- */
-int __eval(char (*bd)[10])
-{
-	int s = 0;
-	s += evalfives(bd);
-	return s;
+			e += scoreof(ef);
+			updatemax(&f,ef);
+		}
 }
  
 /*************** Algorithms **************************/
