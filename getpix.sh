@@ -16,9 +16,9 @@ echo 0
 i=`expr index "$lct" ,`
 x=$((${lct:0:$((i-1))}+50))
 y=$((${lct:i}+50))
-prd=39
-offx=10
-offy=20
+prd=55
+offx=16
+offy=30
 x=$(($x+$offx))
 y=$(($y+$offy))
 
