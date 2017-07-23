@@ -6,13 +6,7 @@ from util import *
 def __all(c1,c2,c3,c4,c5):
     return c1==c2 and c1==c3 and c1==c4 and c1==c5 and c1!='.'
 
-state = raw_input()
-score = input()
-if state == "over":
-    print "over"
-    print score
-else:
-    bd = [raw_input() for i in range(9)]
+def cancel(bd,score):
     bl = [[False for i in range(9)] for j in range(9)]
 
     for i in range(9):
@@ -57,8 +51,19 @@ else:
                 score += 1
 
     if cc:
-        print "cancelled"
+        return "cancelled",score,bd
     else:
-        print "normal"
+        return "normal",score,bd
+
+state = raw_input()
+score = input()
+if state == "over":
+    print "over"
     print score
-    printboard(bd)
+else:
+    bd = [raw_input() for i in range(9)]
+    state,score,bd = cancel(bd,score)
+    print state
+    print score
+    if state != "over":
+        printboard(bd)
