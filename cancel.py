@@ -55,15 +55,16 @@ def cancel(bd,score):
     else:
         return "normal",score,bd
 
-state = raw_input()
-score = input()
-if state == "over":
-    print "over"
-    print score
-else:
-    bd = [raw_input() for i in range(9)]
-    state,score,bd = cancel(bd,score)
-    print state
-    print score
-    if state != "over":
-        printboard(bd)
+if __name__ == "__main__":
+    state = raw_input()
+    score = input()
+    if state == "over":
+        print "over"
+        print score
+    else:
+        bd = [raw_input() for i in range(9)]
+        state,score,bd = cancel(bd,score)
+        print state
+        print score
+        if state != "over":
+            printboard(bd)

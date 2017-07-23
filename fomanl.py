@@ -87,19 +87,20 @@ def bestmove(bd):
                     bd[r] = strrep(bd[r],s,'.')
     return m
 
-state = raw_input()
-score = input()
-if state == "over":
-    print "over"
-    print score
-else:
-    data = [raw_input() for i in range(9)]
-    # printboard(data)
-    bm = bestmove(data)
-    if bm == None:
+if __name__ == "__main__":
+    state = raw_input()
+    score = input()
+    if state == "over":
         print "over"
         print score
     else:
-        print "normal"
-        print score
-        printcolormove(data,bm[1][0],bm[1][1],bm[2][0],bm[2][1])
+        data = [raw_input() for i in range(9)]
+        # printboard(data)
+        bm = bestmove(data)
+        if bm == None:
+            print "over"
+            print score
+        else:
+            print "normal"
+            print score
+            printcolormove(data,bm[1][0],bm[1][1],bm[2][0],bm[2][1])

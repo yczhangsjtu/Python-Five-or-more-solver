@@ -21,21 +21,22 @@ def add_rand(bd):
             l.remove(p)
         return "normal",bd
 
-state = raw_input()
-score = input()
-if state == "over":
-    print "over"
-    print score
-else:
-    bd = [raw_input() for i in range(9)]
-
-    if state == "cancelled":
-        print "normal"
+if __name__ == "__main__":
+    state = raw_input()
+    score = input()
+    if state == "over":
+        print "over"
         print score
-        printboard(bd)
     else:
-        state,bd = add_rand(bd)
-        print state
-        print score
-        if state == "normal":
+        bd = [raw_input() for i in range(9)]
+
+        if state == "cancelled":
+            print "normal"
+            print score
             printboard(bd)
+        else:
+            state,bd = add_rand(bd)
+            print state
+            print score
+            if state == "normal":
+                printboard(bd)

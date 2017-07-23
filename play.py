@@ -1,8 +1,70 @@
 #!/usr/bin/python
 
 from Tkinter import *
+from addrand import *
+from cancel import *
+from util import *
+
+
+global x0,y0,w,h,nw,nh,gw,gh
+global colorMap
+global currboard
+global score
+global state
+global pos1,pos2
+
+def drawBoard(bd,canvas):
+    canvas.create_rectangle(x0,y0,x1,y1,fill="white")
+    for i in range(nh):
+        for j in range(nw):
+            x = x0+w*j
+            y = y0+h*i
+            if [i,j] == pos1:
+                canvas.create_rectangle(x,y,x+w,y+h,fill="yellow")
+            else:
+                canvas.create_rectangle(x,y,x+w,y+h,fill="white")
+            if bd[i][j] != ".":
+                canvas.create_oval(x,y,x+w,y+h,fill=colorMap[bd[i][j]])
+
+def getIndex(x,y):
+    offx,offy = x-x0,y-y0
+    return offy/h,offx/w
+
+def mouseClick(event):
+    global pos1,pos2
+    x,y = event.x,event.y
+    i,j = getIndex(x,y)
+    if i >= 0 and i < nw and j >= 0 and j < nh:
+        if len(pos1) == 0:
+            pos1 = [i,j]
+        else:
+            pos2 = [i,j]
+            if pos1 != pos2 and connected(currboard,pos1[0],pos1[1],pos2[0],pos2[1]) and \
+                currboard[pos1[0]][pos1[1]] != "." and \
+                currboard[pos2[0]][pos2[1]] == ".":
+
+                currboard[pos2[0]] = strrep(currboard[pos2[0]],pos2[1],currboard[pos1[0]][pos1[1]])
+                currboard[pos1[0]] = strrep(currboard[pos1[0]],pos1[1],".")
+            pos1,pos2 = [],[]
+    drawBoard(currboard,canvas)
 
 if __name__ == "__main__":
+
+    x0,y0,w,h = 0,0,40,40
+    nw,nh = 9,9
+    gw,gh = nw*w,nh*h
+    x1,y1 = x0+gw,y0+gh
+
+    colorMap = {
+        "r":"red",
+        "g":"green",
+        "b":"blue",
+        "y":"yellow",
+        "o":"orange",
+        "d":"cyan",
+        "p":"magenta",
+        ".":"white",
+    }
 
     root = Tk()
 
@@ -11,7 +73,8 @@ if __name__ == "__main__":
 
     hintButton = Button(rframe,text="Hint")
     scoreLabel = Label(rframe,text="Score")
-    canvas = Canvas(lframe)
+    canvas = Canvas(lframe,width=gw,height=gh)
+    canvas.bind("<Button-1>",mouseClick)
 
     rframe.pack(side=RIGHT)
     lframe.pack(side=LEFT)
@@ -20,6 +83,15 @@ if __name__ == "__main__":
     scoreLabel.pack(side=BOTTOM)
     canvas.pack(side=LEFT)
 
+    currboard = ["."*nw]*nh
+    state = "normal"
+    score = 0
+    pos1 = []
+    pos2 = []
+
+    state,currboard = add_rand(currboard)
+
+    drawBoard(currboard,canvas)
     # canvas.create_rectangle(20,20,300,300,fill="red")
     # canvas.create_text(30,30,text="Canvas",anchor=NW,fill="blue")
 
