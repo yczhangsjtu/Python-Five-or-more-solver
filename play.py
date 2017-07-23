@@ -31,7 +31,7 @@ def getIndex(x,y):
     return offy/h,offx/w
 
 def mouseClick(event):
-    global pos1,pos2
+    global pos1,pos2,currboard,state,score
     x,y = event.x,event.y
     i,j = getIndex(x,y)
     if i >= 0 and i < nw and j >= 0 and j < nh:
@@ -45,6 +45,10 @@ def mouseClick(event):
 
                 currboard[pos2[0]] = strrep(currboard[pos2[0]],pos2[1],currboard[pos1[0]][pos1[1]])
                 currboard[pos1[0]] = strrep(currboard[pos1[0]],pos1[1],".")
+                state,score,currboard = cancel(currboard,score)
+                if state != "cancelled":
+                    state,currboard = add_rand(currboard)
+                    state,score,currboard = cancel(currboard,score)
             pos1,pos2 = [],[]
     drawBoard(currboard,canvas)
 
