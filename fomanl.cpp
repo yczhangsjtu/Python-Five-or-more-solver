@@ -129,7 +129,8 @@ bool empty = false;
 int main(int argc, char *argv[])
 {
 	int ch, index;
-	while((ch = getopt(argc,argv,"caei:")) != -1)
+	bool onlymove = false;
+	while((ch = getopt(argc,argv,"caei:m")) != -1)
 	{
 		switch(ch)
 		{
@@ -137,6 +138,7 @@ int main(int argc, char *argv[])
 		case 'a': add = true; break;
 		case 'e': empty = true; break;
 		case 'i': index = atoi(optarg); break;
+		case 'm': onlymove = true; break;
 		}
 	}
 	/*
@@ -174,24 +176,22 @@ int main(int argc, char *argv[])
 			return 0;
 		}
 	}
-	if(!color)
+	Move *bm = bestmove(data);
+	if(!bm)
 	{
-		while(cycle(data,&score))
-			;
 		printf("over\n%d\n",score);
 	}
 	else
 	{
-		Move *bm = bestmove(data);
-		if(!bm)
-		{
-			printf("over\n%d\n",score);
+		if(!onlymove) {
+			if(!color)
+				printmove(data,bm->p,bm->q,bm->r,bm->s);
+			else
+				printcolormove(data,bm->p,bm->q,bm->r,bm->s);
+		} else {
+			printf("%s\n%d\n%d\n%d\n%d\n%d\n","normal",score,bm->p,bm->q,bm->r,bm->s);
 		}
-		else
-		{
-			printcolormove(data,bm->p,bm->q,bm->r,bm->s);
-			delete bm;
-		}
+		delete bm;
 	}
 	return 0;
 }
