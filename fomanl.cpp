@@ -130,7 +130,8 @@ int main(int argc, char *argv[])
 {
 	int ch, index;
 	bool onlymove = false;
-	while((ch = getopt(argc,argv,"caei:m")) != -1)
+	bool train = false;
+	while((ch = getopt(argc,argv,"caei:mt")) != -1)
 	{
 		switch(ch)
 		{
@@ -139,6 +140,7 @@ int main(int argc, char *argv[])
 		case 'e': empty = true; break;
 		case 'i': index = atoi(optarg); break;
 		case 'm': onlymove = true; break;
+		case 't': train = true; break;
 		}
 	}
 	/*
@@ -154,9 +156,11 @@ int main(int argc, char *argv[])
 	int score;
 	if(empty)
 	{
-		for(int i = 0; i < 9; i++)
+		for(int i = 0; i < 9; i++) {
 			for(int j = 0; j < 9; j++)
 				data[i][j] = '.';
+			data[i][9] = '\0';
+		}
 		score = 0;
 	}
 	else
@@ -168,6 +172,17 @@ int main(int argc, char *argv[])
 		}
 	}
 	srand((unsigned)time(0)+index);
+	if(train) {
+		while(true) {
+			lineprintboard(data);
+			if(!addrand(data)) break;
+			Move *bm = bestmove(data);
+			if(!bm) break;
+			takemove(data,bm->p,bm->q,bm->r,bm->s);
+			cancel(data);
+		}
+		return 0;
+	}
 	if(add)
 	{
 		if(!addrand(data))

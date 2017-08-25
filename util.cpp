@@ -278,6 +278,13 @@ void printboard(char (*bd)[10])
 		printf("%s\n",bd[i]);
 }
 
+void lineprintboard(char (*bd)[10])
+{
+	for(int i = 0; i < 9; i++)
+		printf("%s",bd[i]);
+	printf("\n");
+}
+
 /*
  * Print how to move the pawn
  */

@@ -19,6 +19,7 @@ global move
 def drawBoard(bd,canvas):
     global x0,y0,x1,y1,currboard,move
     canvas.create_rectangle(x0,y0,x1,y1,fill="white")
+    canvas.delete("all")
     for i in range(nh):
         for j in range(nw):
             x = x0+w*j
