@@ -128,7 +128,7 @@ bool empty = false;
 
 int main(int argc, char *argv[])
 {
-	int ch, index;
+	int ch, index, c;
 	bool onlymove = false;
 	bool train = false;
 	while((ch = getopt(argc,argv,"caei:mt")) != -1)
@@ -174,12 +174,18 @@ int main(int argc, char *argv[])
 	srand((unsigned)time(0)+index);
 	if(train) {
 		while(true) {
-			lineprintboard(data);
 			if(!addrand(data)) break;
+			printf("add\n");
+			lineprintboard(data);
 			Move *bm = bestmove(data);
 			if(!bm) break;
 			takemove(data,bm->p,bm->q,bm->r,bm->s);
-			cancel(data);
+			printf("action\n");
+			lineprintboard(data);
+			if(c = cancel(data)) {
+				printf("cancel %d\n",c);
+				lineprintboard(data);
+			}
 		}
 		return 0;
 	}

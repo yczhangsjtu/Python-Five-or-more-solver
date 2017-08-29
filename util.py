@@ -1,5 +1,8 @@
 import os
 
+def copyboard(bd):
+    return [line for line in bd]
+
 def emptyboard():
     return ['.'*9 for i in range(9)]
 
@@ -226,7 +229,7 @@ def printcolormove(bd,p,q,r,s):
     d = bd[r][s]
     bd[p] = strrep(bd[p],q,'O')
     bd[r] = strrep(bd[r],s,'*')
-    os.system('clear')
+    # os.system('clear')
     for l in bd:
         m = ''
         for k in l:

@@ -1,12 +1,27 @@
 #!/usr/bin/python
 
 import os
+import nn
+import cancel
+import numpy as np
 from util import *
 
 def __eval(bd):
     s = 0
     s += evalfives(bd)
     return s
+
+def neural(bd):
+    neuralNetwork = nn.NeuralNetwork(81,100,100,100,1)
+    neuralNetwork.layer1.weight = np.load("layer1.w.npy")
+    neuralNetwork.layer1.bias = np.load("layer1.b.npy")
+    neuralNetwork.layer2.weight = np.load("layer2.w.npy")
+    neuralNetwork.layer2.bias = np.load("layer2.b.npy")
+    neuralNetwork.layer3.weight = np.load("layer3.w.npy")
+    neuralNetwork.layer3.bias = np.load("layer3.b.npy")
+    neuralNetwork.layer4.weight = np.load("layer4.w.npy")
+    neuralNetwork.layer4.bias = np.load("layer4.b.npy")
+    return nn.compute(neuralNetwork,bd)
 
 def evalfives(bd):
     s = 0
@@ -78,13 +93,19 @@ def bestmove(bd):
                         continue
                     if not connected(bd,p,q,r,s):
                         continue
-                    c = bd[p][q]
-                    bd[p] = strrep(bd[p],q,'.')
-                    bd[r] = strrep(bd[r],s,c)
-                    e = __eval(bd)
-                    if m == None or e > m[0]: m = (e,(p,q),(r,s))
-                    bd[p] = strrep(bd[p],q,c)
-                    bd[r] = strrep(bd[r],s,'.')
+                    tmp = copyboard(bd)
+                    c = tmp[p][q]
+                    tmp[p] = strrep(tmp[p],q,'.')
+                    tmp[r] = strrep(tmp[r],s,c)
+                    # e = __eval(tmp)
+                    state,score,tmp = cancel.cancel(tmp,0)
+                    e = neural(tmp)
+                    if m == None or e > m[0]:
+                        m = (e,(p,q),(r,s))
+                        printcolormove(bd,m[1][0],m[1][1],m[2][0],m[2][1])
+                        # printboard(tmp)
+                        print e
+    print
     return m
 
 if __name__ == "__main__":

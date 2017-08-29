@@ -3,6 +3,7 @@
 from Tkinter import *
 import subprocess
 import string
+import fomanl
 
 from addrand import *
 from cancel import *
@@ -43,23 +44,18 @@ def getIndex(x,y):
 
 def showHint():
     global currboard,score,state,move
-    # with open("/tmp/board") as f:
-    #     f.write("%s\n"%state)
-    #     f.write("%d\n"%score)
-    #     for l in currboard:
-    #         f.write("%s\n"%l)
-    p = subprocess.Popen(['./fomanl','-m'],stdout=subprocess.PIPE,stdin=subprocess.PIPE)
-    p.stdin.write("%s\n"%state)
-    p.stdin.write("%d\n"%score)
-    for l in currboard:
-        p.stdin.write("%s\n"%l)
-    state = string.strip(p.stdout.readline())
-    s = int(string.strip(p.stdout.readline()))
-    # print state
-    # print s
-    if state == "normal":
-        move = [int(string.strip(p.stdout.readline())) for i in range(4)]
-        print move
+    bm = fomanl.bestmove(currboard)
+    move = [bm[1][0],bm[1][1],bm[2][0],bm[2][1]]
+    # p = subprocess.Popen(['./fomanl','-m'],stdout=subprocess.PIPE,stdin=subprocess.PIPE)
+    # p.stdin.write("%s\n"%state)
+    # p.stdin.write("%d\n"%score)
+    # for l in currboard:
+    #     p.stdin.write("%s\n"%l)
+    # state = string.strip(p.stdout.readline())
+    # s = int(string.strip(p.stdout.readline()))
+    # if state == "normal":
+    #     move = [int(string.strip(p.stdout.readline())) for i in range(4)]
+    #     print move
     drawBoard(currboard,canvas)
 
 def mouseClick(event):
